@@ -6,7 +6,7 @@ Communication is hard.  Sometimes it's nice to have a robot enforce communicatio
 
 Currently, the API is written to be easily hosted inside of AWS as a Lambda, but there's no reason this shouldn't work inside of Azure. 
 
-This is meant to be customized to your business needs by forking and changing whatever you need to.  There are extension points to include interacting with your build process and an extention point for your build to check to see if the "train" is held before shipping.  This is a lovingly developed clone of a tool written by [@mightymuke](https://github.com/mightymuke). 💕
+This is meant to be customized to your business needs by forking and changing whatever you need to.  There are extension points to include interacting with your build process and an extention point for your build to check to see if the "train" is held before shipping.  This is a lovingly developed clone of a tool written by [@robfe](https://github.com/robfe). 💕
 
 It's tone is meant to be playful and not terrbly serious.
 
