@@ -25,7 +25,7 @@ Setup your Bot account:
 1.  Name it "c3pr"
 1.  Pick your workspace
 1.  Click on "Install App" and install it into your workspace
-1.  Make note of your "Bot User OAuth Access Token" you'll need it to install API
+1.  Make note of your "Bot User OAuth Access Token" you'll need it to install API ([example](https://github.com/drewdelano/c3pr/blob/master/images/bot%20oauth%20token.png))
 1.  Go to the channel you want to use the bot in Slack and "/invite @c3pr" to it
 
 Deploy the API:
@@ -35,7 +35,7 @@ Deploy the API:
 
 
 Finish the Bot account setup in Slack:
-1. Fill out the app details from the sceenshots included
+1. Fill out the app details from the sceenshots ([screenshot #1](https://github.com/drewdelano/c3pr/blob/master/images/bot%20token%20scopes.png) [screenshot #2](https://github.com/drewdelano/c3pr/blob/master/images/event%20subscripions.png))
 1. Re-install the app in your Slack workspace
 1. Once Slack says your endpoint is verified you should be able to issue commands in the channel you invited c3pr into in step 7 
     (start with ".help" or ".join")
@@ -62,4 +62,4 @@ If it isn't working, try running it locally and pointing Slack to it by using ng
 > ngrok http -host-header=localhost 53300
 
 From there you should be able to update your Slack "Event Subscriptions" endpoint to point to your ngrok address
-(Something like "http://eb4e90457c08.ngrok.io/SlackWebhook/Event")
+(Something like "http://eb4e90457c08.ngrok.io/SlackWebhook/Event") ([exmaple](https://github.com/drewdelano/c3pr/blob/master/images/troubleshooting.png))
