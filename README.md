@@ -45,9 +45,9 @@ Prettying things up (optional):
 1. Alias some sort of meaningful emoji to the various flairs (:r: for ready, :er: for everready, :l: for lock)
 1. From your build process check to see if the train is held via curl:
 
-    curl -f https://{host}/Shipping/SafeToDeployProd?channelName={channelName}
-
-            https://localhost:44301/Shipping/SafeToDeployProd?channelName=ship-it
+>    curl -f https://{host}/Shipping/SafeToDeployProd?channelName={channelName}
+>
+>    curl -f https://localhost:44301/Shipping/SafeToDeployProd?channelName=ship-it
 
 Returns:
 * 200 (OK) if the train in the channel specified is not held 
@@ -59,7 +59,7 @@ Returns:
 ## Troubleshooting:
 If it isn't working, try running it locally and pointing Slack to it by using ngrok:
 
-ngrok http -host-header=localhost 53300
+> ngrok http -host-header=localhost 53300
 
 From there you should be able to update your Slack "Event Subscriptions" endpoint to point to your ngrok address
 (Something like "http://eb4e90457c08.ngrok.io/SlackWebhook/Event")
