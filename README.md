@@ -7,7 +7,8 @@ Communication is hard.  Sometimes it's nice to have a robot enforce communicatio
 Currently, the API is written to be easily hosted inside of AWS as a Lambda, but there's no reason this shouldn't work inside of Azure. 
 
 This is meant to be customized to your business needs by forking and changing whatever you need to.  There are extension points to include interacting with your build process and an extention point for your build to check to see if the "train" is held before shipping.  This is a lovingly developed clone of a tool written by [@mightymuke](https://github.com/mightymuke). 💕
-It's tone is meant to be playful and not serious.
+
+It's tone is meant to be playful and not terrbly serious.
 
 ## Nomenclature:
 __Train__ - Sort of synonymous with the channel you install c3pr into in Slack.  Common usages would be things like "get on the train" to ask a developer to join the shipping queue or "the train is held" to indicate that the train has stopped to address an issue in production.
