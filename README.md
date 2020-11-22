@@ -3,7 +3,9 @@ Communication-facilitating shipping bot
 
 ## What?
 Communication is hard.  Sometimes it's nice to have a robot enforce communication changes and only have humans override the robot in exceptional circumstances.  c3pr helps navigate the relatively simple shipping cycle (who's shipping? -> merge changes -> deploy to test and test changes -> deploy to prod and prod testing) with a larger number of people than normal by handling text communication via Slack (it posts messages and uses the channel topic as storage media).
+
 Currently, the API is written to be easily hosted inside of AWS as a Lambda, but there's no reason this shouldn't work inside of Azure. 
+
 This is meant to be customized to your business needs by forking and changing whatever you need to.  There are extension points to include interacting with your build process and an extention point for your build to check to see if the "train" is held before shipping.  This is a lovingly developed clone of a tool written by @mightymuke. 💕
 It's tone is meant to be playful and not serious.
 
