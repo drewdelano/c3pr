@@ -12,5 +12,9 @@ namespace C3PR.Core.Commands
 
         Task<string> GetUserFromId(string userId);
         Task<bool> IsChannelNameValid(string channelName);
+        Task<string> ReadLatestMessageToSelf();
+
+        Task<string> FormatAtNotificationFromUserName(string userName);
+        Task<string> FormatAtHere();
     }
 }

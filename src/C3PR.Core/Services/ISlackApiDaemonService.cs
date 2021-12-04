@@ -10,5 +10,6 @@ namespace C3PR.Core.Services
         Task HandleMessage(string text, string channelName, string userName);
         Task<bool> IsSafeToShip(string channelName);
         Task<bool> IsChannelNameValid(string channelName);
+        Task SetShipUrl(string channelName, string shipUrl);
     }
 }

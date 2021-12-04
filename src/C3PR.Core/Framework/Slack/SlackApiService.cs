@@ -33,7 +33,15 @@ namespace C3PR.Core.Framework
         async Task<Conversation> GetConversationByName(string channelName)
         {
             var channels = await _slackApiClient.Conversations.List();
-            var channel = channels.Channels.First(c => c.Name == channelName);
+            var channel = channels.Channels.FirstOrDefault(c => c.Name == channelName);
+            if (channel == null)
+            {
+                var users = await _slackApiClient.Users.List();
+                var user = users.Members.First(u => u.Name == channelName.TrimStart('@'));
+                var conversation = await _slackApiClient.Conversations.OpenAndReturnInfo(new[] { user.Id });
+                channel = conversation.Channel;
+            }
+
             return channel;
         }
 
@@ -68,6 +76,27 @@ namespace C3PR.Core.Framework
             var channel = channels.Channels.FirstOrDefault(c => c.Name == channelName);
 
             return channel != null;
+        }
+
+        public async Task<string> ReadLatestMessageToSelf()
+        {
+            var channel = await GetConversationByName("@slackbot");
+            var history = await _slackApiClient.Conversations.History(channel.Id);
+
+            return history.Latest;
+        }
+
+        public async Task<string> FormatAtNotificationFromUserName(string userName)
+        {
+            var users = await _slackApiClient.Users.List();
+            var user = users.Members.First(u => u.Name == userName.TrimStart('@'));
+
+            return $"<@{user.Id}>";
+        }
+
+        public async Task<string> FormatAtHere()
+        {
+            return "<!here>";
         }
     }
 }

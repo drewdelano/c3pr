@@ -65,5 +65,27 @@ namespace C3PR.Core.Services
 
             return true;
         }
+
+        public async Task SetShipUrl(string channelName, string shipUrl)
+        {
+            await _slackApiService.PostMessage("@slackbot", $@"{{ ""channelName"": ""{channelName}"", ""shipUrl"": ""{shipUrl}"" }} ");
+
+            await _slackApiService.ReadLatestMessageToSelf();
+
+            var topic = await _slackApiService.GetChannelTopic(channelName);
+            var train = Train.Parse(topic);
+            var driver = train.Carriages.FirstOrDefault()?.Riders.FirstOrDefault();
+            if (driver != null)
+            {
+                var atDriver = await _slackApiService.FormatAtNotificationFromUserName(driver.Name);
+                await _slackApiService.PostMessage(channelName, $"New build deployed!  {atDriver} please co-ordinate testing.  Once everyone is .ready we can deploy to PROD.");
+            }
+            else
+            {
+                var atHere = await _slackApiService.FormatAtHere();
+                await _slackApiService.PostMessage(channelName, $"New build deployed, but wasn't expected {atHere} someone needs to figure out what's going on and post an update here.");
+            }
+
+        }
     }
 }

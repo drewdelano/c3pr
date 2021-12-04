@@ -8,11 +8,11 @@ using C3PR.Api.Models;
 namespace C3PR.Api.Controllers
 {
     [Route("Shipping")]
-    public class ShippingCheckController : ControllerBase
+    public class ShippingController : ControllerBase
     {
         readonly ISlackApiDaemonService _slackApiDaemonService;
 
-        public ShippingCheckController(ISlackApiDaemonService slackApiDaemonService)
+        public ShippingController(ISlackApiDaemonService slackApiDaemonService)
         {
             _slackApiDaemonService = slackApiDaemonService;
         }
@@ -39,6 +39,26 @@ namespace C3PR.Api.Controllers
             {
                 return new IAmATeaPot();
             }
+        }
+
+        [HttpPost]
+        [Route("SetShipUrl")]
+        public async Task<IActionResult> SetShipUrl(string channelName, string shipUrl)
+        {
+            // TODO: should validate url
+            if (string.IsNullOrWhiteSpace(channelName))
+            {
+                return BadRequest();
+            }
+            if (!await _slackApiDaemonService.IsChannelNameValid(channelName))
+            {
+                return Conflict();
+            }
+
+
+            await _slackApiDaemonService.SetShipUrl(channelName, shipUrl);
+
+            return Ok();
         }
     }
 
