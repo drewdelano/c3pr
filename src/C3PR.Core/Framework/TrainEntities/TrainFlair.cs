@@ -14,7 +14,7 @@ namespace C3PR.Core.Framework
         }
 
         public static readonly TrainFlair Hold = new TrainFlair("hold");
-        public static readonly TrainFlair Train = new TrainFlair("train");
+        public static readonly TrainFlair Train = new TrainFlair("choo");
 
 
         public override string ToString()

@@ -43,7 +43,7 @@ Finish the Bot account setup in Slack:
 
 Prettying things up (optional):
 1. Give C3PR a pretty Slack image
-1. Alias some sort of meaningful emoji to the various flairs (:r: for ready, :er: for everready, :l: for lock)
+1. Alias some sort of meaningful emoji to the various flairs (:r: for ready, :er: for everready, :l: for lock, :choo: for train logo, :hold: for denoting something is wrong and needs human intervention)
 1. From your build process check to see if the train is held via curl:
 
 >    curl -f https://{host}/Shipping/SafeToDeployProd?channelName={channelName}
