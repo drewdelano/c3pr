@@ -9,7 +9,7 @@ namespace C3PR.Tests
         [Test]
         public async Task RoundTrip()
         {
-            var textToParse = ":train: <qa> :l: :r: @captain.hook + :er: @peter.pan + @wendy.darling | :m: @tinkerbell | @tinkerbell + @john.darling";
+            var textToParse = ":choo: <qa> :l: :r: @captain.hook + :er: @peter.pan + @wendy.darling | :m: @tinkerbell | @tinkerbell + @john.darling";
             var storage = Train.Parse(textToParse);
 
             var backToText = storage.ToString();

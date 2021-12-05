@@ -17,9 +17,9 @@ namespace C3PR.Tests
         {
             await CommandLineTest<LockCommand>(
                 "@wendy.darling",
-                ":train: <qa> :r: @captain.hook + :er: @peter.pan | @wendy.darling | @tinkerbell + @john.darling",
+                ":choo: <qa> :r: @captain.hook + :er: @peter.pan | @wendy.darling | @tinkerbell + @john.darling",
                 ".lock",
-                ":train: <qa> :r: @captain.hook + :er: @peter.pan | :l: @wendy.darling | @tinkerbell + @john.darling");
+                ":choo: <qa> :r: @captain.hook + :er: @peter.pan | :l: @wendy.darling | @tinkerbell + @john.darling");
         }
 
         [Test]
@@ -27,9 +27,9 @@ namespace C3PR.Tests
         {
             await CommandLineTest<LockCommand>(
                 "@wendy.darling",
-                ":train: <qa> :r: @captain.hook + :er: @peter.pan | @tinkerbell + @john.darling",
+                ":choo: <qa> :r: @captain.hook + :er: @peter.pan | @tinkerbell + @john.darling",
                 ".lock 0",
-                ":train: <qa> :l: :r: @captain.hook + :er: @peter.pan | @tinkerbell + @john.darling");
+                ":choo: <qa> :l: :r: @captain.hook + :er: @peter.pan | @tinkerbell + @john.darling");
         }
 
 
@@ -38,9 +38,9 @@ namespace C3PR.Tests
         {
             await CommandLineTest<UnlockCommand>(
                 "@wendy.darling",
-                ":train: <rollcall> :l: @wendy.darling",
+                ":choo: <rollcall> :l: @wendy.darling",
                 ".unlock",
-                ":train: <rollcall> @wendy.darling");
+                ":choo: <rollcall> @wendy.darling");
         }
     }
 }

@@ -16,9 +16,9 @@ namespace C3PR.Tests
         {
             await CommandLineTest<JoinCommand>(
                 "@wendy.darling",
-                ":train: <qa> :r: @captain.hook + :er: @peter.pan + @wendy.darling | :m: @tinkerbell | @tinkerbell + @john.darling",
+                ":choo: <qa> :r: @captain.hook + :er: @peter.pan + @wendy.darling | :m: @tinkerbell | @tinkerbell + @john.darling",
                 ".join",
-                ":train: <qa> :r: @captain.hook + :er: @peter.pan + @wendy.darling | :m: @tinkerbell | @tinkerbell + @john.darling | @wendy.darling");
+                ":choo: <qa> :r: @captain.hook + :er: @peter.pan + @wendy.darling | :m: @tinkerbell | @tinkerbell + @john.darling | @wendy.darling");
         }
 
 
@@ -27,9 +27,9 @@ namespace C3PR.Tests
         {
             await CommandLineTest<AddCommand>(
                 "@wendy.darling",
-                ":train: <rollcall> @wendy.darling",
+                ":choo: <rollcall> @wendy.darling",
                 ".add @captain.hook 0",
-                ":train: <rollcall> @wendy.darling + @captain.hook");
+                ":choo: <rollcall> @wendy.darling + @captain.hook");
         }
 
         [Test]
@@ -39,7 +39,7 @@ namespace C3PR.Tests
                 "@wendy.darling",
                 "",
                 ".join",
-                ":train: <rollcall> @wendy.darling");
+                ":choo: <rollcall> @wendy.darling");
         }
 
 
@@ -48,9 +48,9 @@ namespace C3PR.Tests
         {
             await CommandLineTest<JoinCommand>(
                 "@wendy.darling",
-                ":train: <qa> :r: @captain.hook + :er: @peter.pan + @wendy.darling | :m: @tinkerbell | @tinkerbell + @john.darling",
+                ":choo: <qa> :r: @captain.hook + :er: @peter.pan + @wendy.darling | :m: @tinkerbell | @tinkerbell + @john.darling",
                 ".join 1",
-                ":train: <qa> :r: @captain.hook + :er: @peter.pan + @wendy.darling | :m: @tinkerbell + @wendy.darling | @tinkerbell + @john.darling");
+                ":choo: <qa> :r: @captain.hook + :er: @peter.pan + @wendy.darling | :m: @tinkerbell + @wendy.darling | @tinkerbell + @john.darling");
         }
 
 
@@ -59,7 +59,7 @@ namespace C3PR.Tests
         {
             await CommandLineTest<JoinCommand>(
                 "@wendy.darling",
-                ":train: <qa> :r: @captain.hook + :er: @peter.pan + @wendy.darling | :m: @tinkerbell | @tinkerbell + @john.darling",
+                ":choo: <qa> :r: @captain.hook + :er: @peter.pan + @wendy.darling | :m: @tinkerbell | @tinkerbell + @john.darling",
                 ".join 0",
                 null,
                 "@wendy.darling: You're already on that carriage.");
@@ -71,7 +71,7 @@ namespace C3PR.Tests
         {
             await CommandLineTest<JoinCommand>(
                 "@wendy.darling",
-                ":train: <qa> :l: @captain.hook + :er: @peter.pan | :m: @tinkerbell | @tinkerbell + @john.darling",
+                ":choo: <qa> :l: @captain.hook + :er: @peter.pan | :m: @tinkerbell | @tinkerbell + @john.darling",
                 ".join 0",
                 null,
                 $"@wendy.darling: That carriage is locked, please check with the driver to coordinate shipping or join another carriage.");
@@ -85,9 +85,9 @@ namespace C3PR.Tests
         {
             await CommandLineTest<KickCommand>(
                 "@wendy.darling",
-                ":train: <qa> :r: @captain.hook + :er: @peter.pan",
+                ":choo: <qa> :r: @captain.hook + :er: @peter.pan",
                 ".kick @peter.pan",
-                ":train: <qa> :r: @captain.hook");
+                ":choo: <qa> :r: @captain.hook");
 
         }
 
@@ -97,9 +97,9 @@ namespace C3PR.Tests
 
             await CommandLineTest<PartCommand>(
                 "@wendy.darling",
-                ":train: <rollcall> :r: @captain.hook + :er: @peter.pan + @wendy.darling | :m: @tinkerbell | @tinkerbell + @john.darling",
+                ":choo: <rollcall> :r: @captain.hook + :er: @peter.pan + @wendy.darling | :m: @tinkerbell | @tinkerbell + @john.darling",
                 ".part",
-                ":train: <rollcall> :r: @captain.hook + :er: @peter.pan | :m: @tinkerbell | @tinkerbell + @john.darling");
+                ":choo: <rollcall> :r: @captain.hook + :er: @peter.pan | :m: @tinkerbell | @tinkerbell + @john.darling");
         }
 
         [Test]
@@ -107,9 +107,9 @@ namespace C3PR.Tests
         {
             await CommandLineTest<PartCommand>(
                 "@wendy.darling",
-                ":train: <qa> :r: @captain.hook + :er: @peter.pan + @wendy.darling | :m: @wendy.darling | @tinkerbell + @john.darling",
+                ":choo: <qa> :r: @captain.hook + :er: @peter.pan + @wendy.darling | :m: @wendy.darling | @tinkerbell + @john.darling",
                 ".part 1",
-                ":train: <qa> :r: @captain.hook + :er: @peter.pan + @wendy.darling | @tinkerbell + @john.darling");
+                ":choo: <qa> :r: @captain.hook + :er: @peter.pan + @wendy.darling | @tinkerbell + @john.darling");
         }
 
 
@@ -118,9 +118,9 @@ namespace C3PR.Tests
         {
             await CommandLineTest<DriverCommand>(
                 "@wendy.darling",
-                ":train: <qa> @captain.hook + @wendy.darling",
+                ":choo: <qa> @captain.hook + @wendy.darling",
                 ".driver",
-                ":train: <qa> @wendy.darling + @captain.hook");
+                ":choo: <qa> @wendy.darling + @captain.hook");
         }
 
         [Test]
@@ -128,9 +128,9 @@ namespace C3PR.Tests
         {
             await CommandLineTest<DriverCommand>(
                 "@wendy.darling",
-                ":train: <qa> @captain.hook + :r: @wendy.darling",
+                ":choo: <qa> @captain.hook + :r: @wendy.darling",
                 ".driver",
-                ":train: <qa> @wendy.darling + @captain.hook");
+                ":choo: <qa> @wendy.darling + @captain.hook");
         }
 
         [Test]
@@ -138,9 +138,9 @@ namespace C3PR.Tests
         {
             await CommandLineTest<DriverCommand>(
                 "@wendy.darling",
-                ":train: <qa> @captain.hook + :r: @peter.pan",
+                ":choo: <qa> @captain.hook + :r: @peter.pan",
                 ".driver @peter.pan",
-                ":train: <qa> @peter.pan + @captain.hook");
+                ":choo: <qa> @peter.pan + @captain.hook");
         }
 
         [Test]
@@ -148,9 +148,9 @@ namespace C3PR.Tests
         {
             await CommandLineTest<DriverCommand>(
                 "@wendy.darling",
-                ":train: <qa> @captain.hook + @peter.pan | @captain.hook + @wendy.darling",
+                ":choo: <qa> @captain.hook + @peter.pan | @captain.hook + @wendy.darling",
                 ".driver",
-                ":train: <qa> @captain.hook + @peter.pan | @wendy.darling + @captain.hook");
+                ":choo: <qa> @captain.hook + @peter.pan | @wendy.darling + @captain.hook");
         }
 
         [Test]
@@ -158,7 +158,7 @@ namespace C3PR.Tests
         {
             await CommandLineTest<DriverCommand>(
                 "@wendy.darling",
-                ":train: <qa> @captain.hook + @wendy.darling | @captain.hook + @wendy.darling",
+                ":choo: <qa> @captain.hook + @wendy.darling | @captain.hook + @wendy.darling",
                 ".driver",
                 null,
                 "@wendy.darling: You're on multiple carriages, which one did you mean?  Remember it's zero-based.");
@@ -169,9 +169,9 @@ namespace C3PR.Tests
         {
             await CommandLineTest<DriverCommand>(
                 "@wendy.darling",
-                ":train: <qa> @captain.hook + @wendy.darling | @captain.hook + @wendy.darling",
+                ":choo: <qa> @captain.hook + @wendy.darling | @captain.hook + @wendy.darling",
                 ".driver 1",
-                ":train: <qa> @captain.hook + @wendy.darling | @wendy.darling + @captain.hook");
+                ":choo: <qa> @captain.hook + @wendy.darling | @wendy.darling + @captain.hook");
         }
     }
 }

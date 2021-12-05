@@ -17,9 +17,9 @@ namespace C3PR.Tests
         {
             await CommandLineTest<ReadyCommand>(
                 "@wendy.darling",
-                ":train: <qa> @captain.hook + @wendy.darling",
+                ":choo: <qa> @captain.hook + @wendy.darling",
                 ".ready",
-                ":train: <qa> @captain.hook + :r: @wendy.darling");
+                ":choo: <qa> @captain.hook + :r: @wendy.darling");
         }
 
 
@@ -28,9 +28,9 @@ namespace C3PR.Tests
         {
             await CommandLineTest<EverReadyCommand>(
                 "@wendy.darling",
-                ":train: <qa> @captain.hook + @wendy.darling",
+                ":choo: <qa> @captain.hook + @wendy.darling",
                 ".everready",
-                ":train: <qa> @captain.hook + :er: @wendy.darling");
+                ":choo: <qa> @captain.hook + :er: @wendy.darling");
         }
 
         [Test]
@@ -38,9 +38,9 @@ namespace C3PR.Tests
         {
             await CommandLineTest<ReadyCommand>(
                 "@wendy.darling",
-                ":train: <rollcall> :r: @captain.hook + @wendy.darling",
+                ":choo: <rollcall> :r: @captain.hook + @wendy.darling",
                 ".ready",
-                ":train: <merging> @captain.hook + @wendy.darling",
+                ":choo: <merging> @captain.hook + @wendy.darling",
                 "@captain.hook\n@wendy.darling\n\nMerge your PRs when you're ready and then .ready to indicate that you're done");
         }
 
@@ -49,7 +49,7 @@ namespace C3PR.Tests
         {
             await CommandLineTest<ReadyCommand>(
                 "@wendy.darling",
-                ":train: :hold: <rollcall> :r: @captain.hook + @wendy.darling",
+                ":choo: :hold: <rollcall> :r: @captain.hook + @wendy.darling",
                 ".ready",
                 null,
                 "@wendy.darling: Train is held!  Can't continue.");
@@ -60,7 +60,7 @@ namespace C3PR.Tests
         {
             await CommandLineTest<EverReadyCommand>(
                 "@wendy.darling",
-                ":train: :hold: <rollcall> :r: @captain.hook + @wendy.darling",
+                ":choo: :hold: <rollcall> :r: @captain.hook + @wendy.darling",
                 ".everready",
                 null,
                 "@wendy.darling: Train is held!  Can't continue.");
@@ -71,9 +71,9 @@ namespace C3PR.Tests
         {
             await CommandLineTest<ReadyCommand>(
                 "@wendy.darling",
-                ":train: <prod> :r: @captain.hook + @wendy.darling | @peter.pan",
+                ":choo: <prod> :r: @captain.hook + @wendy.darling | @peter.pan",
                 ".ready",
-                ":train: <rollcall> @peter.pan",
+                ":choo: <rollcall> @peter.pan",
                 "@peter.pan\n\nEverybody ready-up and let's get this train a-rollin'");
         }
 
@@ -82,9 +82,9 @@ namespace C3PR.Tests
         {
             await CommandLineTest<ReadyCommand>(
                 "@wendy.darling",
-                ":train: <prod> :r: @captain.hook + @wendy.darling",
+                ":choo: <prod> :r: @captain.hook + @wendy.darling",
                 ".ready",
-                ":train: ");
+                ":choo: ");
         }
 
 
@@ -93,7 +93,7 @@ namespace C3PR.Tests
         {
             await CommandLineTest<ReadyCommand>(
                 "@wendy.darling",
-                ":train:",
+                ":choo:",
                 ".ready",
                 null,
                 "@wendy.darling: You're not on the train.");
@@ -106,9 +106,9 @@ namespace C3PR.Tests
 
             await CommandLineTest<ReadyCommand>(
                 "@wendy.darling",
-                ":train: <qa> @captain.hook + @wendy.darling",
+                ":choo: <qa> @captain.hook + @wendy.darling",
                 ".ready @captain.hook",
-                ":train: <qa> :r: @captain.hook + @wendy.darling");
+                ":choo: <qa> :r: @captain.hook + @wendy.darling");
         }
 
         [Test]
@@ -117,9 +117,9 @@ namespace C3PR.Tests
 
             await CommandLineTest<UnreadyCommand>(
                 "@wendy.darling",
-                ":train: <qa> :r: @captain.hook + @wendy.darling",
+                ":choo: <qa> :r: @captain.hook + @wendy.darling",
                 ".unready @captain.hook",
-                ":train: <qa> @captain.hook + @wendy.darling");
+                ":choo: <qa> @captain.hook + @wendy.darling");
         }
 
         [Test]
@@ -128,9 +128,9 @@ namespace C3PR.Tests
 
             await CommandLineTest<HoldCommand>(
                 "@wendy.darling",
-                ":train: <qa> @captain.hook + @wendy.darling",
+                ":choo: <qa> @captain.hook + @wendy.darling",
                 ".hold",
-                ":train: :hold: <qa> @captain.hook + @wendy.darling");
+                ":choo: :hold: <qa> @captain.hook + @wendy.darling");
         }
 
         [Test]
@@ -139,9 +139,9 @@ namespace C3PR.Tests
 
             await CommandLineTest<UnholdCommand>(
                 "@wendy.darling",
-                ":train: :hold: <qa> @captain.hook + @wendy.darling",
+                ":choo: :hold: <qa> @captain.hook + @wendy.darling",
                 ".unhold",
-                ":train: <qa> @captain.hook + @wendy.darling");
+                ":choo: <qa> @captain.hook + @wendy.darling");
         }
 
         [Test]
@@ -150,9 +150,9 @@ namespace C3PR.Tests
 
             await CommandLineTest<UnreadyCommand>(
                 "@wendy.darling",
-                ":train: <qa> @captain.hook + :r: @wendy.darling",
+                ":choo: <qa> @captain.hook + :r: @wendy.darling",
                 ".unready",
-                ":train: <qa> @captain.hook + @wendy.darling");
+                ":choo: <qa> @captain.hook + @wendy.darling");
         }
 
 
@@ -162,9 +162,9 @@ namespace C3PR.Tests
 
             await CommandLineTest<UnreadyCommand>(
                 "@wendy.darling",
-                ":train: <qa> @captain.hook + :er: @wendy.darling",
+                ":choo: <qa> @captain.hook + :er: @wendy.darling",
                 ".unready",
-                ":train: <qa> @captain.hook + @wendy.darling");
+                ":choo: <qa> @captain.hook + @wendy.darling");
         }
     }
 }
