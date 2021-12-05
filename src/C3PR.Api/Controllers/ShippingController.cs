@@ -1,7 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
-using SlackNet;
-using System;
 using C3PR.Core.Services;
 using C3PR.Api.Models;
 

@@ -2,6 +2,7 @@
 using Autofac.Core;
 using Autofac.Core.Registration;
 using C3PR.Core;
+using C3PR.Core.Services;
 using Microsoft.Extensions.Configuration;
 using SlackNet;
 using SlackNet.Bot;
@@ -25,6 +26,7 @@ namespace C3PR.Api.EntryPoint
             ScanAndRegister(builder, "Command");
 
             builder.RegisterModule<C3prCoreModule>();
+            builder.RegisterType<ExternalBuildTrigger>().AsImplementedInterfaces();
         }
 
         void ScanAndRegister(ContainerBuilder builder, string endsWith)

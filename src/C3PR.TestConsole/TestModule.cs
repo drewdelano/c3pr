@@ -14,6 +14,8 @@ namespace C3PR.TestConsole
             builder.RegisterType<ProgramConsole>().AsImplementedInterfaces();
 
             builder.RegisterModule<C3prCoreModule>();
+
+            builder.RegisterType<TestMockForExternalBuildTrigger>().AsImplementedInterfaces();
         }
     }
 }

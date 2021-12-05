@@ -22,6 +22,7 @@ namespace C3PR.Tests
         {
             var containerBuilder = new ContainerBuilder();
             containerBuilder.RegisterModule<C3prCoreModule>();
+            containerBuilder.RegisterInstance(new Mock<IExternalBuildTrigger>().Object).AsImplementedInterfaces();
             containerBuilder.RegisterInstance(_mockSlackApiService.Object).AsImplementedInterfaces();
             _container = containerBuilder.Build();
         }

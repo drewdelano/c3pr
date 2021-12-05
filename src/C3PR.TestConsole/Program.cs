@@ -12,6 +12,7 @@ namespace C3PR.TestConsole
             var containerBuilder = new ContainerBuilder();
             containerBuilder.RegisterModule<TestModule>();
             containerBuilder.RegisterType<TestMockForSlack>()
+                .AsSelf()
                 .AsImplementedInterfaces()
                 .SingleInstance();
 

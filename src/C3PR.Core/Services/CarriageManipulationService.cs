@@ -5,15 +5,18 @@ using System.Text;
 using System.Threading.Tasks;
 using C3PR.Core.Commands;
 using C3PR.Core.Framework;
+using C3PR.Core.Framework.Slack;
 
 namespace C3PR.Core.Services
 {
     public class CarriageManipulationService : ICarriageManipulationService
     {
         ISlackApiService _slackApiService;
-        public CarriageManipulationService(ISlackApiService slackApiService)
+        IExternalBuildTrigger _externalBuildTriggerService;
+        public CarriageManipulationService(ISlackApiService slackApiService, IExternalBuildTrigger externalBuildTriggerService)
         {
             _slackApiService = slackApiService;
+            _externalBuildTriggerService = externalBuildTriggerService;
         }
 
         public void AddRiderInNewCarriage(Train train, string userName)
@@ -84,16 +87,60 @@ namespace C3PR.Core.Services
             await HandlePhaseAdvancement(train, channelName);
             if (train.Phase == Phase.Testing)
             {
-                await _slackApiService.PostMessage(channelName, $"Normally I'd trigger the build here...");
+                var messageToSelf = await _slackApiService.ReadLatestMessageToSelf();
+                var store = SlackMessageStorage.Parse(messageToSelf);
+
+                var channel = store.FirstOrDefault(c => c.ChannelName == channelName);
+                if (channel == null)
+                {
+                    channel = new SlackMessageStorage
+                    {
+                        ChannelName = channelName,
+                        ShipUrl = ""
+                    };
+
+                    messageToSelf = SlackMessageStorage.Stringify(store);
+                    await _slackApiService.PostMessage("@slackbot", messageToSelf);
+                }
+
+                try
+                {
+                    // trigger the build
+                    await _externalBuildTriggerService.TriggerBuild(channel);
+                    await _slackApiService.PostMessage(channelName, $"Starting the build...");
+                }
+                catch (Exception ex)
+                {
+                    var atHere = await _slackApiService.FormatAtHere();
+                    await _slackApiService.PostMessage(channelName, $"Something went wrong triggering the build... {atHere}");
+                }
+            }
+
+            string deploymentUrl = null;
+            if (train.Phase == Phase.Production)
+            {
+                var messageToSelf = await _slackApiService.ReadLatestMessageToSelf();
+                var channels = SlackMessageStorage.Parse(messageToSelf);
+
+                var channel = channels.FirstOrDefault(c => c.ChannelName == channelName);
+                if (channel?.ShipUrl != null)
+                {
+                    // link to deploy url in channel
+                    deploymentUrl = channel.ShipUrl;
+                }
+                else
+                {
+                    deploymentUrl = "Isn't configured for some reason...";
+                }
             }
 
             if (train.Carriages.Count > 0)
             {
-                await HandleBeginPhaseMessaging(train, channelName);
+                await HandleBeginPhaseMessaging(train, channelName, deploymentUrl);
             }
         }
 
-        async Task HandleBeginPhaseMessaging(Train train, string channelName)
+        async Task HandleBeginPhaseMessaging(Train train, string channelName, string deploymentUrl)
         {
             var shippers = $"{string.Join("\n", train.Carriages[0].Riders.Select(r => r.Name))}\n\n";
             var driver = train.Carriages[0].Riders[0].Name;
@@ -112,6 +159,7 @@ namespace C3PR.Core.Services
             else if (train.Phase == Phase.Production)
             {
                 await _slackApiService.PostMessage(channelName, $"{shippers}{driver} deploy the build, make sure prod testing happens if needed, also watch the metrics and rayguns to make sure everything is OK");
+                await _slackApiService.PostMessage(channelName, $"Deploy URL: {deploymentUrl}");
             }
             else
             {

@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using C3PR.Core.Commands;
 using C3PR.Core.Framework;
+using C3PR.Core.Framework.Slack;
 
 namespace C3PR.Core.Services
 {
@@ -68,10 +69,25 @@ namespace C3PR.Core.Services
 
         public async Task SetShipUrl(string channelName, string shipUrl)
         {
-            await _slackApiService.PostMessage("@slackbot", $@"{{ ""channelName"": ""{channelName}"", ""shipUrl"": ""{shipUrl}"" }} ");
+            var latest = await _slackApiService.ReadLatestMessageToSelf();
+            latest ??= "";
 
-            await _slackApiService.ReadLatestMessageToSelf();
+            var store = SlackMessageStorage.Parse(latest);
+            var channel = store.FirstOrDefault(c => c.ChannelName == channelName);
+            if (channel == null)
+            {
+                channel = new SlackMessageStorage
+                {
+                    ChannelName = channelName
+                };
+                store.Add(channel);
+            }
+            channel.ShipUrl = shipUrl;
+            latest = SlackMessageStorage.Stringify(store);
+            await _slackApiService.PostMessage("@slackbot", latest);
 
+
+            // notify in chat
             var topic = await _slackApiService.GetChannelTopic(channelName);
             var train = Train.Parse(topic);
             var driver = train.Carriages.FirstOrDefault()?.Riders.FirstOrDefault();

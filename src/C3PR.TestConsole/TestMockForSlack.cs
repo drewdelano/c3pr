@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using C3PR.Core.Commands;
 using C3PR.Core.Framework;
+using C3PR.Core.Framework.Slack;
 using SlackNet;
 using SlackNet.Bot;
 using SlackNet.WebApi;
@@ -72,9 +74,34 @@ namespace C3PR.TestConsole
                 {
                     new User
                     {
-                        Name = "drew.delano",
-                        Id = "drew.delano"
-                    }
+                        Name = "wendy.darling",
+                        Id = "U123wendy.darling"
+                    },
+                    new User
+                    {
+                        Name = "captain.hook",
+                        Id = "U123captain.hook"
+                    },
+                    new User
+                    {
+                        Name = "peter.pan",
+                        Id = "U123peter.pan"
+                    },
+                    new User
+                    {
+                        Name = "tinkerbell",
+                        Id = "U123tinkerbell"
+                    },
+                    new User
+                    {
+                        Name = "john.darling",
+                        Id = "U123john.darling"
+                    },
+                    new User
+                    {
+                        Name = "slackbot",
+                        Id = "USLACKBOT"
+                    },
                 }
             };
         }
@@ -95,6 +122,34 @@ namespace C3PR.TestConsole
             Console.WriteLine($"C3PR: {message.Text}");
             return new PostMessageResponse
             {
+            };
+        }
+
+
+        async Task<ConversationOpenResponse> IConversationsApi.OpenAndReturnInfo(IEnumerable<string> userIds, CancellationToken? cancellationToken = null)
+        {
+            return new ConversationOpenResponse
+            {
+                Channel = new Conversation
+                {
+                    Id = userIds.Single()
+                }
+            };
+        }
+
+        public string SlackBotsLatestMessage { get; internal set; } = SlackMessageStorage.Stringify(new List<SlackMessageStorage>
+            {
+                new SlackMessageStorage
+                {
+                    ChannelName = "#ship-it",
+                    ShipUrl = ""
+                }
+            });
+        async Task<ConversationHistoryResponse> IConversationsApi.History(string channelId, string latestTs = null, string oldestTs = null, bool inclusive = false, int limit = 100, string cursor = null, CancellationToken? cancellationToken = null)
+        {
+            return new ConversationHistoryResponse
+            {
+                Latest = SlackBotsLatestMessage
             };
         }
 
@@ -164,6 +219,7 @@ namespace C3PR.TestConsole
         public IUserProfileApi UserProfile => throw new NotImplementedException();
 
         public IViewsApi Views => throw new NotImplementedException();
+
 
         public event EventHandler<IMessage> OnMessage;
 
@@ -302,11 +358,6 @@ namespace C3PR.TestConsole
             throw new NotImplementedException();
         }
 
-        public Task<ConversationHistoryResponse> History(string channelId, string latestTs = null, string oldestTs = null, bool inclusive = false, int limit = 100, string cursor = null, CancellationToken? cancellationToken = null)
-        {
-            throw new NotImplementedException();
-        }
-
         public Task<Conversation> Info(string channelId, bool includeLocale = false, bool includeNumMembers = false, CancellationToken? cancellationToken = null)
         {
             throw new NotImplementedException();
@@ -369,11 +420,6 @@ namespace C3PR.TestConsole
         }
 
         public Task<ConversationOpenResponse> OpenAndReturnInfo(string channelId, CancellationToken? cancellationToken = null)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<ConversationOpenResponse> OpenAndReturnInfo(IEnumerable<string> userIds, CancellationToken? cancellationToken = null)
         {
             throw new NotImplementedException();
         }
