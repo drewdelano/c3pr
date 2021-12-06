@@ -40,6 +40,8 @@ namespace C3PR.Tests
                 .ReturnsAsync<string, ISlackApiService, string>(s => s);
             _mockSlackApiService.Setup(m => m.PostMessage("#ship-it", It.IsAny<string>()))
                 .Callback<string, string>((_, message) => errorMessage = message);
+            _mockSlackApiService.Setup(m => m.FormatAtNotificationFromUserName(It.IsAny<string>()))
+                .Returns<string>(userId => Task.FromResult(userId));
 
             var ctx = new CommandContext
             {

@@ -64,11 +64,14 @@ namespace C3PR.Core.Services
                     break;
                 }
             }
-            await _slackApiService.SetChannelTopic(channelName, train.ToString());
 
             if (isReadyToAdvance)
             {
                 await AdvanceCarriage(train, channelName);
+            }
+            else
+            {
+                await _slackApiService.SetChannelTopic(channelName, train.ToString());
             }
         }
 
@@ -86,6 +89,8 @@ namespace C3PR.Core.Services
             train.Carriages[0].Riders[0].Flairs.Flairs.Remove(RiderFlair.EverReady);
 
             await HandlePhaseAdvancement(train, channelName);
+            await _slackApiService.SetChannelTopic(channelName, train.ToString());
+
             if (train.Phase == Phase.Testing)
             {
                 var messageToSelf = await _slackApiService.ReadLatestMessageToSelf();
@@ -114,6 +119,8 @@ namespace C3PR.Core.Services
                 {
                     var atHere = await _slackApiService.FormatAtHere();
                     await _slackApiService.PostMessage(channelName, $"Something went wrong triggering the build... {atHere}");
+
+                    Console.WriteLine(ex.ToString());
                 }
             }
 
@@ -143,23 +150,41 @@ namespace C3PR.Core.Services
 
         async Task HandleBeginPhaseMessaging(Train train, string channelName, string deploymentUrl)
         {
-            var shippers = $"{string.Join("\n", train.Carriages[0].Riders.Select(r => r.Name))}\n\n";
-            var driver = train.Carriages[0].Riders[0].Name;
+            var sbShippersExcludingDriver = new StringBuilder();
+            var sbShippersIncludingDriver = new StringBuilder();
+            string driver = null;
+            foreach (var shipper in train.Carriages[0].Riders)
+            {
+                var atShipper = await _slackApiService.FormatAtNotificationFromUserName(shipper.Name);
+
+                if (driver == null)
+                {
+                    driver = atShipper;
+                    sbShippersIncludingDriver.Append($"{atShipper} ");
+                }
+                else
+                {
+                    sbShippersIncludingDriver.Append($"{atShipper} ");
+                    sbShippersExcludingDriver.Append($"{atShipper} ");
+                }
+            }
+            var shippersIncludingDriver = sbShippersIncludingDriver.ToString().TrimEnd(' ');
+            var shippersExcludingDriver = sbShippersExcludingDriver.ToString().TrimEnd(' ');
             if (train.Phase == Phase.Rollcall)
             {
-                await _slackApiService.PostMessage(channelName, $"{shippers}Everybody ready-up and let's get this train a-rollin'");
+                await _slackApiService.PostMessage(channelName, $"{shippersIncludingDriver}\nEverybody ready-up and let's get this train a-rollin'");
             }
             else if (train.Phase == Phase.Merging)
             {
-                await _slackApiService.PostMessage(channelName, $"{shippers}Merge your PRs when you're ready and then .ready to indicate that you're done");
+                await _slackApiService.PostMessage(channelName, $"{shippersIncludingDriver}\nMerge your PRs when you're ready and then .ready to indicate that you're done");
             }
             else if (train.Phase == Phase.Testing)
             {
-                await _slackApiService.PostMessage(channelName, $"{shippers}Wait for the build to finish deploying and then work with QA to get things tested");
+                await _slackApiService.PostMessage(channelName, $"Wait for the build to finish deploying and then work with QA to get things tested");
             }
             else if (train.Phase == Phase.Production)
             {
-                await _slackApiService.PostMessage(channelName, $"{shippers}{driver} deploy the build, make sure prod testing happens if needed, also watch the metrics and rayguns to make sure everything is OK");
+                await _slackApiService.PostMessage(channelName, $"{shippersExcludingDriver}\n{driver} deploy the build, make sure prod testing happens if needed, also watch the metrics and rayguns to make sure everything is OK");
                 await _slackApiService.PostMessage(channelName, $"Deploy URL: {deploymentUrl}");
             }
             else
@@ -189,7 +214,8 @@ namespace C3PR.Core.Services
             }
             else
             {
-                await _slackApiService.PostMessage($"I'm not quite sure what phase we're in.  {train.Carriages[0].Riders[0].Name} can you take over?  I'm feeling faint.", channelName);
+                var atDriver = await _slackApiService.FormatAtNotificationFromUserName(train.Carriages[0].Riders[0].Name);
+                await _slackApiService.PostMessage($"I'm not quite sure what phase we're in.  {atDriver} can you take over?  I'm feeling faint.", channelName);
                 return false;
             }
 

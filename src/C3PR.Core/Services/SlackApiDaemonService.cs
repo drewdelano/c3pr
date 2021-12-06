@@ -93,8 +93,15 @@ namespace C3PR.Core.Services
             var driver = train.Carriages.FirstOrDefault()?.Riders.FirstOrDefault();
             if (driver != null)
             {
+                var sbShippersExcludingDriver = new StringBuilder();
+                foreach (var shipper in train.Carriages[0].Riders.Skip(1))
+                {
+                    var atShipper = await _slackApiService.FormatAtNotificationFromUserName(shipper.Name);
+                    sbShippersExcludingDriver.Append($"{atShipper} ");
+                }
+                var shippersExcludingDriver = sbShippersExcludingDriver.ToString();
                 var atDriver = await _slackApiService.FormatAtNotificationFromUserName(driver.Name);
-                await _slackApiService.PostMessage(channelName, $"New build deployed!  {atDriver} please co-ordinate testing.  Once everyone is .ready we can deploy to PROD.");
+                await _slackApiService.PostMessage(channelName, $"New build deployed! :tada:\n {shippersExcludingDriver}\n{atDriver} please co-ordinate testing.  Once everyone is .ready we can deploy to PROD.");
             }
             else
             {

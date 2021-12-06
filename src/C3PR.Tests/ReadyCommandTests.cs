@@ -41,7 +41,7 @@ namespace C3PR.Tests
                 ":choo: <rollcall> :r: @captain.hook + @wendy.darling",
                 ".ready",
                 ":choo: <merging> @captain.hook + @wendy.darling",
-                "@captain.hook\n@wendy.darling\n\nMerge your PRs when you're ready and then .ready to indicate that you're done");
+                "@captain.hook @wendy.darling\nMerge your PRs when you're ready and then .ready to indicate that you're done");
         }
 
         [Test]
@@ -74,7 +74,7 @@ namespace C3PR.Tests
                 ":choo: <prod> :r: @captain.hook + @wendy.darling | @peter.pan",
                 ".ready",
                 ":choo: <rollcall> @peter.pan",
-                "@peter.pan\n\nEverybody ready-up and let's get this train a-rollin'");
+                "@peter.pan\nEverybody ready-up and let's get this train a-rollin'");
         }
 
         [Test]
