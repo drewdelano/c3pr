@@ -43,7 +43,6 @@ namespace C3PR.Api.Controllers
         [Route("SetShipUrl")]
         public async Task<IActionResult> SetShipUrl(string channelName, string shipUrl)
         {
-            // TODO: should validate url
             if (string.IsNullOrWhiteSpace(channelName))
             {
                 return BadRequest();

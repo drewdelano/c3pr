@@ -67,8 +67,6 @@ namespace C3PR.Core.Commands
             }
             rider.Flairs.Flairs.Add(RiderFlair.EverReady);
             await _carriageManipulationService.AdvanceCarriageIfNecessary(train, commandContext.ChannelName);
-
-            await _slackApiService.SetChannelTopic(commandContext.ChannelName, train.ToString());
         }
     }
 }

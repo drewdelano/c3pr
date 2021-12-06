@@ -64,6 +64,7 @@ namespace C3PR.Core.Services
                     break;
                 }
             }
+            await _slackApiService.SetChannelTopic(channelName, train.ToString());
 
             if (isReadyToAdvance)
             {
