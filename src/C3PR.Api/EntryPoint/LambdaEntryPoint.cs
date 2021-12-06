@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using System.Threading.Tasks;
+using Autofac.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
 
@@ -34,8 +35,6 @@ namespace C3PR.Api.EntryPoint
         /// <param name="builder"></param>
         protected override void Init(IWebHostBuilder builder)
         {
-            builder
-                .UseStartup<Startup>();
         }
 
         /// <summary>
@@ -47,6 +46,12 @@ namespace C3PR.Api.EntryPoint
         /// <param name="builder"></param>
         protected override void Init(IHostBuilder builder)
         {
+            builder
+                .UseServiceProviderFactory(new AutofacServiceProviderFactory())
+                .ConfigureWebHostDefaults(webBuilder =>
+                {
+                    webBuilder.UseStartup<Startup>();
+                });
         }
     }
 }
