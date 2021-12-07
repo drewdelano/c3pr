@@ -12,6 +12,15 @@ namespace C3PR.Core.Services
 {
     public class ExternalBuildTrigger : IExternalBuildTrigger
     {
+        string _githubPersonalAccessToken;
+        string _githubRepositoryBuildDispatch;
+
+        public ExternalBuildTrigger(string githubPersonalAccessToken, string githubRepositoryBuildDispatch)
+        {
+            _githubPersonalAccessToken = githubPersonalAccessToken;
+            _githubRepositoryBuildDispatch = githubRepositoryBuildDispatch;
+        }
+
         public async Task TriggerBuild(SlackMessageStorage storage)
         {
             // Example of how to configure this for Github Actions repository_dispatch
@@ -19,12 +28,12 @@ namespace C3PR.Core.Services
             // Replace all PLACEHOLDER_ s in this file with the appropriate data
 
             var client = new HttpClient();
-            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", "PLACE_HOLDER_FOR_GITHUB_TOKEN");
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _githubPersonalAccessToken);
             client.DefaultRequestHeaders.Host = "api.github.com";
             client.DefaultRequestHeaders.UserAgent.Add(ProductInfoHeaderValue.Parse("C3PR"));
 
-            var postBody = "{\"event_type\": \"c3pr_build\", \"client_payload\": { \"title\": \"title\" }}";
-            var result = await client.PostAsync("https://api.github.com/repos/PLACE_HOLDER_FOR_ORG/PLACEHOLDER_FOR_PROJECT/dispatches", new StringContent(postBody));
+            var postBody = "{\"event_type\": \"c3pr_build\"}";
+            var result = await client.PostAsync(_githubRepositoryBuildDispatch, new StringContent(postBody));
 
             if (!result.IsSuccessStatusCode)
             {

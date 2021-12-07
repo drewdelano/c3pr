@@ -26,7 +26,17 @@ namespace C3PR.Api.EntryPoint
             ScanAndRegister(builder, "Command");
 
             builder.RegisterModule<C3prCoreModule>();
-            builder.RegisterType<ExternalBuildTrigger>().AsImplementedInterfaces();
+
+
+            builder.Register(cc =>
+            {
+                var configuration = cc.Resolve<IConfiguration>();
+                var githubPersonalAccessToken = configuration.GetValue<string>("githubPersonalAccessToken");
+                var githubRepositoryBuildDispatch = configuration.GetValue<string>("githubRepositoryBuildDispatch");
+                var slackClient = new ExternalBuildTrigger(githubPersonalAccessToken, githubRepositoryBuildDispatch);
+
+                return slackClient;
+            }).AsImplementedInterfaces();
         }
 
         void ScanAndRegister(ContainerBuilder builder, string endsWith)
