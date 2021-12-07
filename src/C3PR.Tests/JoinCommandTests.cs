@@ -29,7 +29,8 @@ namespace C3PR.Tests
                 "@wendy.darling",
                 ":choo: <rollcall> @wendy.darling",
                 ".add @captain.hook 0",
-                ":choo: <rollcall> @wendy.darling + @captain.hook");
+                ":choo: <rollcall> @wendy.darling + @captain.hook",
+                "@wendy.darling: A new rider has joined the carriage!  @captain.hook start a thread here to say what you're shipping");
         }
 
         [Test]
@@ -50,7 +51,8 @@ namespace C3PR.Tests
                 "@wendy.darling",
                 ":choo: <qa> :r: @captain.hook + :er: @peter.pan + @wendy.darling | :m: @tinkerbell | @tinkerbell + @john.darling",
                 ".join 1",
-                ":choo: <qa> :r: @captain.hook + :er: @peter.pan + @wendy.darling | :m: @tinkerbell + @wendy.darling | @tinkerbell + @john.darling");
+                ":choo: <qa> :r: @captain.hook + :er: @peter.pan + @wendy.darling | :m: @tinkerbell + @wendy.darling | @tinkerbell + @john.darling",
+                "@tinkerbell: A new rider has joined the carriage!  @wendy.darling start a thread here to say what you're shipping");
         }
 
 

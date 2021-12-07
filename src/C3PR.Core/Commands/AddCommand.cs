@@ -53,6 +53,10 @@ namespace C3PR.Core.Commands
             _carriageManipulationService.AddRiderToCarriageByIndex(train, targetUser, specificCarriageNumber);
 
             await _slackApiService.SetChannelTopic(commandContext.ChannelName, train.ToString());
+
+            var atDriver = await _slackApiService.FormatAtNotificationFromUserName(train.Carriages[specificCarriageNumber].Riders[0].Name);
+            var atJoiner = await _slackApiService.FormatAtNotificationFromUserName(targetUser);
+            await _slackApiService.PostMessage(commandContext.ChannelName, $"{atDriver}: A new rider has joined the carriage!  {atJoiner} start a thread here to say what you're shipping");
         }
     }
 }
