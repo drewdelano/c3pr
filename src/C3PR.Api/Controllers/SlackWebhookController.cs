@@ -44,6 +44,7 @@ namespace C3PR.Api.Controllers
                     }
                     catch (Exception ex)
                     {
+                        Console.WriteLine(ex.ToString());
                     }
                 }
             }
