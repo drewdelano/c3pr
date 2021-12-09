@@ -36,7 +36,7 @@ namespace C3PR.Api.Controllers
                     return Ok();
                 }
 
-                if (webhook.Event.Type == "message")
+                if (webhook.Event.Type == "message" && webhook.Event.SubType == null)
                 {
                     try
                     {
