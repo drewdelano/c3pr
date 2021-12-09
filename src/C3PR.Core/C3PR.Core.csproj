@@ -6,7 +6,7 @@
 
   <ItemGroup>
     <PackageReference Include="Autofac.Extensions.DependencyInjection" Version="7.1.0" />
-    <PackageReference Include="SlackNet.Bot" Version="0.7.10" />
+    <PackageReference Include="SlackNet.Bot" Version="0.10.1" />
   </ItemGroup>
 
 </Project>

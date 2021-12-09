@@ -66,7 +66,7 @@ namespace C3PR.TestConsole
             };
         }
 
-        async Task<UserListResponse> IUsersApi.List(string cursor, int limit, CancellationToken? cancellationToken)
+        async Task<UserListResponse> IUsersApi.List(string cursor = null, bool includeLocale = false, int limit = 0, CancellationToken? cancellationToken = null)
         {
             return new UserListResponse
             {
@@ -107,7 +107,7 @@ namespace C3PR.TestConsole
         }
 
 
-        async Task<User> IUsersApi.Info(string userId, CancellationToken? cancellationToken)
+        async Task<User> IUsersApi.Info(string userId, bool includeLocale = false, CancellationToken? cancellationToken = null)
         {
             return new User
             {
@@ -167,7 +167,7 @@ namespace C3PR.TestConsole
 
         public IBotsApi Bots => throw new NotImplementedException();
 
-        public IChannelsApi Channels => throw new NotImplementedException();
+        //public IChannelsApi Channels => throw new NotImplementedException();
 
 
         public IDialogApi Dialog => throw new NotImplementedException();
@@ -180,13 +180,7 @@ namespace C3PR.TestConsole
 
         public IFilesApi Files => throw new NotImplementedException();
 
-        public IGroupsApi Groups => throw new NotImplementedException();
-
-        public IImApi Im => throw new NotImplementedException();
-
         public IMigrationApi Migration => throw new NotImplementedException();
-
-        public IMpimApi Mpim => throw new NotImplementedException();
 
         public IOAuthApi OAuth => throw new NotImplementedException();
 
@@ -220,6 +214,11 @@ namespace C3PR.TestConsole
 
         public IViewsApi Views => throw new NotImplementedException();
 
+        public IAppsConnectionsApi AppsConnectionsApi { get; }
+        public IAppsEventsAuthorizationsApi AppsEventsAuthorizations { get; }
+        public IOAuthV2Api OAuthV2 { get; }
+        public IOpenIdApi OpenIdApi { get; }
+        public IWorkflowsApi Workflows { get; }
 
         public event EventHandler<IMessage> OnMessage;
 
@@ -551,6 +550,16 @@ namespace C3PR.TestConsole
         }
 
         Task<PermalinkResponse> IChatApi.GetPermalink(string channelId, string messageTs, CancellationToken? cancellationToken)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<User> Info(string userId, bool includeLocale = false, CancellationToken? cancellationToken = null)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<UserListResponse> List(string cursor = null, bool includeLocale = false, int limit = 0, CancellationToken? cancellationToken = null)
         {
             throw new NotImplementedException();
         }
