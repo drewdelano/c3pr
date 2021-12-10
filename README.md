@@ -33,7 +33,8 @@ Deploy the API:
 1.  Deploy the AWS Lambda to your AWS account
 1.  The API expects to find the Bot User OAuth Access Token in the environmental variable "BotOauthToken" (see C3prAwsLambdaContainer).
     So copy/paste the vaue from step 6 into the AWS Console for the lambda's environmental variable named "BotOauthToken"
-1.  It might be easier to deploy it by command line too: dotnet lambda deploy-serverless --configuration debug --stack-name c3pr --s3-bucket {PLACEHOLDER_c3pr} --template serverless.template --profile {PLACEHOLDER_AWS_profile}
+1.  It might be easier to deploy it by command line too:
+> dotnet lambda deploy-serverless --configuration debug --stack-name c3pr --s3-bucket {PLACEHOLDER_c3pr} --template serverless.template --profile {PLACEHOLDER_AWS_profile}
 
 
 Finish the Bot account setup in Slack:

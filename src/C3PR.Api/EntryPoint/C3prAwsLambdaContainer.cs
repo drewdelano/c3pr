@@ -33,7 +33,11 @@ namespace C3PR.Api.EntryPoint
                 var configuration = cc.Resolve<IConfiguration>();
                 var githubPersonalAccessToken = configuration.GetValue<string>("githubPersonalAccessToken");
                 var githubRepositoryBuildDispatch = configuration.GetValue<string>("githubRepositoryBuildDispatch");
-                var slackClient = new ExternalBuildTrigger(githubPersonalAccessToken, githubRepositoryBuildDispatch);
+                var githubRepositoryMasterBranch = configuration.GetValue<string>("githubRepositoryMasterBranch");
+                var slackClient = new ExternalGithubActionsBuildTrigger(
+                    githubPersonalAccessToken,
+                    githubRepositoryBuildDispatch,
+                    githubRepositoryMasterBranch);
 
                 return slackClient;
             }).AsImplementedInterfaces();

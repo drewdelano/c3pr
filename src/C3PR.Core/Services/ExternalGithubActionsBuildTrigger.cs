@@ -1,4 +1,5 @@
 ﻿using C3PR.Core.Framework.Slack;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -10,15 +11,30 @@ using System.Threading.Tasks;
 
 namespace C3PR.Core.Services
 {
-    public class ExternalBuildTrigger : IExternalBuildTrigger
+    public class ExternalGithubActionsBuildTrigger : IExternalBuildTrigger
     {
         string _githubPersonalAccessToken;
         string _githubRepositoryBuildDispatch;
+        string _githubRepositoryMasterBranch;
 
-        public ExternalBuildTrigger(string githubPersonalAccessToken, string githubRepositoryBuildDispatch)
+        public ExternalGithubActionsBuildTrigger(
+            string githubPersonalAccessToken,
+            string githubRepositoryBuildDispatch,
+            string githubRepositoryMasterBranch)
         {
             _githubPersonalAccessToken = githubPersonalAccessToken;
             _githubRepositoryBuildDispatch = githubRepositoryBuildDispatch;
+            _githubRepositoryMasterBranch = githubRepositoryMasterBranch;
+        }
+
+        class BranchHeadInfo
+        {
+            public class BranchHeadCommitInfo
+            {
+                public string Message { get; set; }
+            }
+
+            public BranchHeadCommitInfo Commit { get; set; }
         }
 
         public async Task TriggerBuild(SlackMessageStorage storage)
@@ -32,7 +48,10 @@ namespace C3PR.Core.Services
             client.DefaultRequestHeaders.Host = "api.github.com";
             client.DefaultRequestHeaders.UserAgent.Add(ProductInfoHeaderValue.Parse("C3PR"));
 
-            var postBody = "{\"event_type\": \"c3pr_build\"}";
+            var headResult = await client.GetAsync(_githubRepositoryMasterBranch);
+            var headInfo = JsonConvert.DeserializeObject<BranchHeadInfo>(await headResult.Content.ReadAsStringAsync());
+
+            var postBody = $"{{\"event_type\": \"{headInfo.Commit.Message}\"}}";
             var result = await client.PostAsync(_githubRepositoryBuildDispatch, new StringContent(postBody));
 
             if (!result.IsSuccessStatusCode)

@@ -83,7 +83,7 @@ namespace C3PR.Core.Framework
             var channel = await GetConversationByName("@slackbot");
             var history = await _slackApiClient.Conversations.History(channel.Id);
 
-            return history.Messages[0].Text;
+            return history.Messages?.FirstOrDefault()?.Text ?? "";
         }
 
         public async Task<string> FormatAtNotificationFromUserName(string userName)
