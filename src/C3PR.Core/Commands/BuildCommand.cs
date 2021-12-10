@@ -9,12 +9,12 @@ using SlackNet.Blocks;
 
 namespace C3PR.Core.Commands
 {
-    public class TriggerCommand : ICommand
+    public class BuildCommand : ICommand
     {
         readonly ISlackApiService _slackApiService;
         readonly IExternalBuildTrigger _externalBuildTrigger;
 
-        public TriggerCommand(ISlackApiService slackApiService, IExternalBuildTrigger externalBuildTrigger)
+        public BuildCommand(ISlackApiService slackApiService, IExternalBuildTrigger externalBuildTrigger)
         {
             _slackApiService = slackApiService;
             _externalBuildTrigger = externalBuildTrigger;
@@ -22,7 +22,7 @@ namespace C3PR.Core.Commands
 
         public bool CanHandleMessage(CommandContext commandContext)
         {
-            if (commandContext.Command == ".trigger")
+            if (commandContext.Command == ".build")
             {
                 return true;
             }
@@ -36,7 +36,7 @@ namespace C3PR.Core.Commands
             var topic = await _slackApiService.GetChannelTopic(channelName);
             var train = Train.Parse(topic);
             
-            await _slackApiService.PostMessage(commandContext.ChannelName, $"Triggering the build pipeline...");
+            await _slackApiService.PostMessage(commandContext.ChannelName, $"Running the build pipeline...");
             
             var messageToSelf = await _slackApiService.ReadLatestMessageToSelf();
             var store = SlackMessageStorage.Parse(messageToSelf);

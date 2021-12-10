@@ -58,7 +58,7 @@ Commands:
 .ready @person = Communicates that you've talked with @person and they are ready to go.
 .unlock 0 = Unlocks first carriage.
 .unready = Unmarks yourself as ready.
-.trigger = Re-trigger the build process.
+.build = Trigger the creation of a new build.
 ";
             await _slackApiService.PostMessage(commandContext.ChannelName, helpText);
         }
