@@ -9,7 +9,7 @@
     "profile"     : "default",
     "region"      : "us-west-2",
     "configuration" : "Release",
-    "framework"     : "netcoreapp3.1",
+    "framework"     : "dotnet8",
     "s3-prefix"     : "C3PR/",
     "template"      : "serverless.template",
     "template-parameters" : "\"ShouldCreateBucket\"=\"true\";\"BucketName\"=\"\"",
