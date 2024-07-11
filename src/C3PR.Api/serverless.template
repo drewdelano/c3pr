@@ -40,7 +40,7 @@
       "Type": "AWS::Serverless::Function",
       "Properties": {
         "Handler": "C3PR.Api::C3PR.Api.EntryPoint.LambdaEntryPoint::FunctionHandlerAsync",
-        "Runtime": "dotnetcore3.1",
+        "Runtime": "dotnet8",
         "CodeUri": "",
         "MemorySize": 256,
         "Timeout": 30,
