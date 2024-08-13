@@ -31,13 +31,20 @@ namespace C3PR.Api.EntryPoint
             builder.Register(cc =>
             {
                 var configuration = cc.Resolve<IConfiguration>();
-                var githubPersonalAccessToken = configuration.GetValue<string>("githubPersonalAccessToken");
-                var githubRepositoryBuildDispatch = configuration.GetValue<string>("githubRepositoryBuildDispatch");
-                var githubRepositoryMasterBranch = configuration.GetValue<string>("githubRepositoryMasterBranch");
+                var githubAppPem = configuration.GetValue<string>("githubAppPem");
+                var githubAppClientId = configuration.GetValue<string>("githubAppClientId");
+                var githubAppInstallationId = configuration.GetValue<string>("githubAppInstallationId");
+                var githubOrgName = configuration.GetValue<string>("githubOrgName");
+                var githubRepoName = configuration.GetValue<string>("githubRepoName");
+                var githubRepoMainBranchName = configuration.GetValue<string>("githubRepoMainBranchName");
+
                 var slackClient = new ExternalGithubActionsBuildTrigger(
-                    githubPersonalAccessToken,
-                    githubRepositoryBuildDispatch,
-                    githubRepositoryMasterBranch);
+                    githubAppPem,
+                    githubAppClientId,
+                    githubAppInstallationId,
+                    githubOrgName,
+                    githubRepoName,
+                    githubRepoMainBranchName);
 
                 return slackClient;
             }).AsImplementedInterfaces();
