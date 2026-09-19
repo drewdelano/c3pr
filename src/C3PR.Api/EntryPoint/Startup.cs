@@ -7,6 +7,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using SlackNet.AspNetCore;
 using SlackNet.Events;
+using C3PR.Api.Security;
 
 namespace C3PR.Api.EntryPoint
 {
@@ -70,6 +71,8 @@ namespace C3PR.Api.EntryPoint
             //app.UseHttpsRedirection();
 
             app.UseRouting();
+
+            app.UseMiddleware<RequestAuthenticationMiddleware>();
 
             app.UseAuthorization();
 

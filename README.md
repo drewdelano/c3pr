@@ -19,44 +19,71 @@ __Phase__ - Each step of the shipping cycle the developers journey through.
 
 __Flair__ - Emojis used to represent state visually (ready, locked, held, etc.)
 
-## How to Deploy:
-Setup your Bot account:
-1.  Go here: https://api.slack.com/apps
-1.  Click "Create New App"
-1.  Name it "c3pr"
-1.  Pick your workspace
-1.  Click on "Install App" and install it into your workspace
-1.  Make note of your "Bot User OAuth Access Token" you'll need it to install API ([example](https://github.com/drewdelano/c3pr/blob/master/images/bot%20oauth%20token.png))
-1.  Go to the channel you want to use the bot in Slack and "/invite @c3pr" to it
+## How to deploy
 
-Deploy the API:
-1.  Deploy the AWS Lambda to your AWS account
-1.  The API expects to find the Bot User OAuth Access Token in the environmental variable "BotOauthToken" (see C3prAwsLambdaContainer).
-    So copy/paste the vaue from step 6 into the AWS Console for the lambda's environmental variable named "BotOauthToken"
-1.  It might be easier to deploy it by command line too:
-> dotnet lambda deploy-serverless --configuration debug --stack-name c3pr --s3-bucket {PLACEHOLDER_c3pr} --template serverless.template --profile {PLACEHOLDER_AWS_profile}
+### 1. Create the Slack app
 
+Create a Slack app with a bot user, install it in the target workspace, and grant the bot the scopes shown in [the bot scopes screenshot](images/bot%20token%20scopes.png). Record both the Bot User OAuth Token and the app's Signing Secret. Invite `@c3pr` to the shipping channel.
 
-Finish the Bot account setup in Slack:
-1. Fill out the app details from the sceenshots ([screenshot #1](https://github.com/drewdelano/c3pr/blob/master/images/bot%20token%20scopes.png) [screenshot #2](https://github.com/drewdelano/c3pr/blob/master/images/event%20subscripions.png))
-1. Re-install the app in your Slack workspace
-1. Once Slack says your endpoint is verified you should be able to issue commands in the channel you invited c3pr into in step 7 
-    (start with ".help" or ".join")
+Slack requests are authenticated with the signing secret. C3PR rejects requests whose signature is invalid or whose timestamp is more than five minutes old.
+
+### 2. Create the GitHub App
+
+Create a private GitHub App and grant only the repository `Actions: write` permission. Install it only on the repository C3PR will build. Generate a private key and record the app's client ID and installation ID. The target workflow must declare `workflow_dispatch` as a trigger.
+
+### 3. Deploy the Lambda
+
+Install `Amazon.Lambda.Tools`, then run this command from `src/C3PR.Api`. The deployment bucket is used by the deployment tool only; C3PR has no runtime S3 dependency.
+
+```powershell
+dotnet tool install -g Amazon.Lambda.Tools
+$privateKeyBase64 = [Convert]::ToBase64String([IO.File]::ReadAllBytes("c3pr.private-key.pem"))
+
+dotnet lambda deploy-serverless `
+  --configuration Release `
+  --stack-name c3pr `
+  --s3-bucket YOUR_DEPLOYMENT_BUCKET `
+  --template serverless.template `
+  --profile YOUR_AWS_PROFILE `
+  --template-parameters "BotOauthToken=YOUR_BOT_TOKEN;SlackSigningSecret=YOUR_SIGNING_SECRET;C3prCallbackSecret=YOUR_CALLBACK_SECRET;GithubAppPrivateKeyBase64=$privateKeyBase64;GithubAppClientId=YOUR_CLIENT_ID;GithubAppInstallationId=YOUR_INSTALLATION_ID;GithubOrgName=YOUR_ORG;GithubRepoName=YOUR_REPO;GithubRepoMainBranchName=master;GithubWorkflowFile=dotnet-core-ci.yml"
+```
+
+The CloudFormation parameters are copied into Lambda environment variables. Parameters carrying credentials are marked `NoEcho`, and the Lambda execution role has only the basic CloudWatch Logs policy.
+
+### 4. Finish Slack configuration
+
+Set the Slack Event Subscriptions request URL to the stack's `SlackEventRequestURL` output, subscribe to bot `message.channels` events, reinstall the app if Slack asks, and invite the bot to the shipping channel. Start with `.help` or `.join`.
 
 Prettying things up (optional):
 1. Give C3PR a pretty Slack image
 1. Alias some sort of meaningful emoji to the various flairs (:r: for ready, :er: for everready, :l: for lock, :choo: for train logo, :hold: for denoting something is wrong and needs human intervention)
-1. From your build process check to see if the train is held via curl:
+1. From your build process, sign requests to the shipping API with the same `C3prCallbackSecret`. The signature base string is `v1:{unix timestamp}:{uppercase HTTP method}:{path and query}:{raw body}`. Send the timestamp in `X-C3PR-Request-Timestamp` and the lowercase HMAC-SHA256 signature as `v1={hex}` in `X-C3PR-Signature`.
 
->    curl -f https://{host}/Shipping/SafeToDeployProd?channelName={channelName}
->
->    curl -f https://localhost:44301/Shipping/SafeToDeployProd?channelName=ship-it
+The following Python example checks whether production deployment is allowed:
+
+```python
+import hashlib, hmac, os, time, urllib.parse, urllib.request
+
+channel = "ship-it"
+path = "/Shipping/SafeToDeployProd?" + urllib.parse.urlencode({"channelName": channel})
+timestamp = str(int(time.time()))
+canonical = f"v1:{timestamp}:GET:{path}:"
+signature = "v1=" + hmac.new(
+    os.environ["C3PR_CALLBACK_SECRET"].encode(), canonical.encode(), hashlib.sha256
+).hexdigest()
+request = urllib.request.Request(
+    os.environ["C3PR_URL"].rstrip("/") + path,
+    headers={"X-C3PR-Request-Timestamp": timestamp, "X-C3PR-Signature": signature},
+)
+urllib.request.urlopen(request)
+```
 
 Returns:
 * 200 (OK) if the train in the channel specified is not held 
 * 418 (I'm a Tea Pot) if the train is held
-* 400 (Bad Request) is the channel name is missing
+* 400 (Bad Request) if the channel name is missing
 * 409 (Conflict) if the channel name doesn't exist or C3PR hasn't been invited to it
+* 401 (Unauthorized) if the signature is missing, invalid, or stale
 * 500 (Internal Server Error) if something breaks in the code
 
 ## Troubleshooting:

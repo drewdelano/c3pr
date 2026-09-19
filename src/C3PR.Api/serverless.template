@@ -1,39 +1,18 @@
 {
   "AWSTemplateFormatVersion": "2010-09-09",
   "Transform": "AWS::Serverless-2016-10-31",
-  "Description": "An AWS Serverless Application that uses the ASP.NET Core framework running in Amazon Lambda.",
+  "Description": "C3PR shipping bot API",
   "Parameters": {
-    "ShouldCreateBucket": {
-      "Type": "String",
-      "AllowedValues": [
-        "true",
-        "false"
-      ],
-      "Description": "If true then the S3 bucket that will be proxied will be created with the CloudFormation stack."
-    },
-    "BucketName": {
-      "Type": "String",
-      "Description": "Name of S3 bucket that will be proxied. If left blank a name will be generated.",
-      "MinLength": "0"
-    }
-  },
-  "Conditions": {
-    "CreateS3Bucket": {
-      "Fn::Equals": [
-        {
-          "Ref": "ShouldCreateBucket"
-        },
-        "true"
-      ]
-    },
-    "BucketNameGenerated": {
-      "Fn::Equals": [
-        {
-          "Ref": "BucketName"
-        },
-        ""
-      ]
-    }
+    "BotOauthToken": { "Type": "String", "NoEcho": true, "MinLength": 1 },
+    "SlackSigningSecret": { "Type": "String", "NoEcho": true, "MinLength": 1 },
+    "C3prCallbackSecret": { "Type": "String", "NoEcho": true, "MinLength": 1 },
+    "GithubAppPrivateKeyBase64": { "Type": "String", "NoEcho": true, "MinLength": 1 },
+    "GithubAppClientId": { "Type": "String", "MinLength": 1 },
+    "GithubAppInstallationId": { "Type": "String", "MinLength": 1 },
+    "GithubOrgName": { "Type": "String", "MinLength": 1 },
+    "GithubRepoName": { "Type": "String", "MinLength": 1 },
+    "GithubRepoMainBranchName": { "Type": "String", "Default": "master", "MinLength": 1 },
+    "GithubWorkflowFile": { "Type": "String", "Default": "dotnet-core-ci.yml", "MinLength": 1 }
   },
   "Resources": {
     "AspNetCoreFunction": {
@@ -44,80 +23,36 @@
         "CodeUri": "",
         "MemorySize": 256,
         "Timeout": 30,
-        "Role": null,
-        "Policies": [
-          "AWSLambda_FullAccess"
-        ],
+        "Policies": ["AWSLambdaBasicExecutionRole"],
         "Environment": {
           "Variables": {
-            "AppS3Bucket": {
-              "Fn::If": [
-                "CreateS3Bucket",
-                {
-                  "Ref": "Bucket"
-                },
-                {
-                  "Ref": "BucketName"
-                }
-              ]
-            }
+            "BotOauthToken": { "Ref": "BotOauthToken" },
+            "SlackSigningSecret": { "Ref": "SlackSigningSecret" },
+            "C3prCallbackSecret": { "Ref": "C3prCallbackSecret" },
+            "GithubAppPrivateKeyBase64": { "Ref": "GithubAppPrivateKeyBase64" },
+            "GithubAppClientId": { "Ref": "GithubAppClientId" },
+            "GithubAppInstallationId": { "Ref": "GithubAppInstallationId" },
+            "GithubOrgName": { "Ref": "GithubOrgName" },
+            "GithubRepoName": { "Ref": "GithubRepoName" },
+            "GithubRepoMainBranchName": { "Ref": "GithubRepoMainBranchName" },
+            "GithubWorkflowFile": { "Ref": "GithubWorkflowFile" }
           }
         },
         "Events": {
-          "ProxyResource": {
-            "Type": "Api",
-            "Properties": {
-              "Path": "/{proxy+}",
-              "Method": "ANY"
-            }
-          },
-          "RootResource": {
-            "Type": "Api",
-            "Properties": {
-              "Path": "/",
-              "Method": "ANY"
-            }
-          }
-        }
-      }
-    },
-    "Bucket": {
-      "Type": "AWS::S3::Bucket",
-      "Condition": "CreateS3Bucket",
-      "Properties": {
-        "BucketName": {
-          "Fn::If": [
-            "BucketNameGenerated",
-            {
-              "Ref": "AWS::NoValue"
-            },
-            {
-              "Ref": "BucketName"
-            }
-          ]
+          "ProxyResource": { "Type": "Api", "Properties": { "Path": "/{proxy+}", "Method": "ANY" } },
+          "RootResource": { "Type": "Api", "Properties": { "Path": "/", "Method": "ANY" } }
         }
       }
     }
   },
   "Outputs": {
     "ApiURL": {
-      "Description": "API endpoint URL for Prod environment",
-      "Value": {
-        "Fn::Sub": "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/"
-      }
+      "Description": "C3PR API endpoint",
+      "Value": { "Fn::Sub": "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/" }
     },
-    "S3ProxyBucket": {
-      "Value": {
-        "Fn::If": [
-          "CreateS3Bucket",
-          {
-            "Ref": "Bucket"
-          },
-          {
-            "Ref": "BucketName"
-          }
-        ]
-      }
+    "SlackEventRequestURL": {
+      "Description": "Slack Event Subscriptions request URL",
+      "Value": { "Fn::Sub": "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/SlackWebhook/Event" }
     }
   }
 }

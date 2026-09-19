@@ -1,4 +1,6 @@
-﻿using Autofac;
+using System;
+using System.Text;
+using Autofac;
 using Autofac.Core;
 using Autofac.Core.Registration;
 using C3PR.Core;
@@ -16,47 +18,47 @@ namespace C3PR.Api.EntryPoint
             builder.Register(cc =>
             {
                 var configuration = cc.Resolve<IConfiguration>();
-                var botOauthToken = configuration.GetValue<string>("BotOauthToken");
-                var slackClient = new SlackApiClient(botOauthToken);
-
-                return slackClient;
+                return new SlackApiClient(Required(configuration, "BotOauthToken"));
             }).As<ISlackApiClient>();
 
             ScanAndRegister(builder, "Service");
             ScanAndRegister(builder, "Command");
-
             builder.RegisterModule<C3prCoreModule>();
-
 
             builder.Register(cc =>
             {
                 var configuration = cc.Resolve<IConfiguration>();
-                var githubAppPem = configuration.GetValue<string>("githubAppPem");
-                var githubAppClientId = configuration.GetValue<string>("githubAppClientId");
-                var githubAppInstallationId = configuration.GetValue<string>("githubAppInstallationId");
-                var githubOrgName = configuration.GetValue<string>("githubOrgName");
-                var githubRepoName = configuration.GetValue<string>("githubRepoName");
-                var githubRepoMainBranchName = configuration.GetValue<string>("githubRepoMainBranchName");
+                var githubAppPem = Encoding.UTF8.GetString(
+                    Convert.FromBase64String(Required(configuration, "GithubAppPrivateKeyBase64")));
 
-                var slackClient = new ExternalGithubActionsBuildTrigger(
+                return new ExternalGithubActionsBuildTrigger(
                     githubAppPem,
-                    githubAppClientId,
-                    githubAppInstallationId,
-                    githubOrgName,
-                    githubRepoName,
-                    githubRepoMainBranchName);
-
-                return slackClient;
+                    Required(configuration, "GithubAppClientId"),
+                    Required(configuration, "GithubAppInstallationId"),
+                    Required(configuration, "GithubOrgName"),
+                    Required(configuration, "GithubRepoName"),
+                    Required(configuration, "GithubRepoMainBranchName"),
+                    configuration.GetValue<string>("GithubWorkflowFile") ?? "dotnet-core-ci.yml");
             }).AsImplementedInterfaces();
+        }
+
+        static string Required(IConfiguration configuration, string name)
+        {
+            var value = configuration.GetValue<string>(name);
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                throw new InvalidOperationException($"Required configuration '{name}' is missing.");
+            }
+            return value;
         }
 
         void ScanAndRegister(ContainerBuilder builder, string endsWith)
         {
             builder.RegisterAssemblyTypes(ThisAssembly)
-                            .PublicOnly()
-                            .Where(t => t.Name.EndsWith(endsWith))
-                            .AsImplementedInterfaces()
-                            .InstancePerLifetimeScope();
+                .PublicOnly()
+                .Where(t => t.Name.EndsWith(endsWith))
+                .AsImplementedInterfaces()
+                .InstancePerLifetimeScope();
         }
     }
 }

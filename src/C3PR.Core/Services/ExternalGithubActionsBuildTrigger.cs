@@ -1,4 +1,4 @@
-﻿using C3PR.Core.Framework.Slack;
+using C3PR.Core.Framework.Slack;
 using Newtonsoft.Json;
 using System;
 using System.Net.Http;
@@ -11,12 +11,13 @@ namespace C3PR.Core.Services
 {
     public class ExternalGithubActionsBuildTrigger : IExternalBuildTrigger
     {
-        string _githubAppPem;
-        string _githubAppClientId;
-        string _githubAppInstallationId;
-        string _githubOrganizationName;
-        string _githubRepositoryName;
-        string _githubRepositoryMainBranchName;
+        readonly string _githubAppPem;
+        readonly string _githubAppClientId;
+        readonly string _githubAppInstallationId;
+        readonly string _githubOrganizationName;
+        readonly string _githubRepositoryName;
+        readonly string _githubRepositoryMainBranchName;
+        readonly string _githubWorkflowFile;
 
         public ExternalGithubActionsBuildTrigger(
             string githubAppPem,
@@ -24,14 +25,16 @@ namespace C3PR.Core.Services
             string githubAppInstallationId,
             string githubOrganizationName,
             string githubRepositoryName,
-            string githubRepositoryMainBranchName)
+            string githubRepositoryMainBranchName,
+            string githubWorkflowFile = "dotnet-core-ci.yml")
         {
-            _githubAppPem = githubAppPem;
-            _githubAppClientId = githubAppClientId;
-            _githubAppInstallationId = githubAppInstallationId;
-            _githubOrganizationName = githubOrganizationName;
-            _githubRepositoryName = githubRepositoryName;
-            _githubRepositoryMainBranchName = githubRepositoryMainBranchName;
+            _githubAppPem = Required(githubAppPem, nameof(githubAppPem));
+            _githubAppClientId = Required(githubAppClientId, nameof(githubAppClientId));
+            _githubAppInstallationId = Required(githubAppInstallationId, nameof(githubAppInstallationId));
+            _githubOrganizationName = Required(githubOrganizationName, nameof(githubOrganizationName));
+            _githubRepositoryName = Required(githubRepositoryName, nameof(githubRepositoryName));
+            _githubRepositoryMainBranchName = Required(githubRepositoryMainBranchName, nameof(githubRepositoryMainBranchName));
+            _githubWorkflowFile = Required(githubWorkflowFile, nameof(githubWorkflowFile));
         }
 
         class AccessTokenHolder
@@ -41,49 +44,39 @@ namespace C3PR.Core.Services
 
         public async Task TriggerBuild(SlackMessageStorage storage)
         {
-            // Example of how to configure this for Github Actions repository_dispatch
-            // https://pakstech.com/blog/github-actions-repository-dispatch/
-            // Replace all PLACEHOLDER_ s in this file with the appropriate data
-
-            var client = new HttpClient();
+            using var client = new HttpClient();
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", GenerateAccessTokenFromPem());
-            client.DefaultRequestHeaders.Host = "api.github.com";
             client.DefaultRequestHeaders.UserAgent.Add(ProductInfoHeaderValue.Parse("C3PR"));
             client.DefaultRequestHeaders.Add("X-GitHub-Api-Version", "2022-11-28");
             client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/vnd.github+json"));
 
-            var installationId = _githubAppInstallationId;
-            var githubGetTokenUrl = $"https://api.github.com/app/installations/{installationId}/access_tokens";
-            var accessTokenHolderRaw = await client.PostAsync(githubGetTokenUrl, null);
-            var accessTokenHolder = JsonConvert.DeserializeObject<AccessTokenHolder>(await accessTokenHolderRaw.Content.ReadAsStringAsync());
-            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessTokenHolder.Token);
-
-            var postBody = JsonConvert.SerializeObject(new
+            var tokenUrl = $"https://api.github.com/app/installations/{_githubAppInstallationId}/access_tokens";
+            using var tokenResponse = await client.PostAsync(tokenUrl, null);
+            tokenResponse.EnsureSuccessStatusCode();
+            var accessToken = JsonConvert.DeserializeObject<AccessTokenHolder>(
+                await tokenResponse.Content.ReadAsStringAsync());
+            if (string.IsNullOrWhiteSpace(accessToken?.Token))
             {
-                @ref = _githubRepositoryMainBranchName
-            });
-            var org = _githubOrganizationName;
-            var repo = _githubRepositoryName;
-            var githubRepositoryBuildDispatchUrl = $"https://api.github.com/repos/{org}/{repo}/actions/workflows/dotnet-core-ci.yml/dispatches";
-            var result = await client.PostAsync(githubRepositoryBuildDispatchUrl, new StringContent(postBody));
+                throw new InvalidOperationException("GitHub returned an empty installation access token.");
+            }
+
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken.Token);
+            var postBody = JsonConvert.SerializeObject(new { @ref = _githubRepositoryMainBranchName });
+            var dispatchUrl = $"https://api.github.com/repos/{_githubOrganizationName}/{_githubRepositoryName}/actions/workflows/{_githubWorkflowFile}/dispatches";
+            using var result = await client.PostAsync(
+                dispatchUrl,
+                new StringContent(postBody, Encoding.UTF8, "application/json"));
 
             if (!result.IsSuccessStatusCode)
             {
-                throw new Exception("Report that things didn't work as planned");
+                throw new HttpRequestException(
+                    $"GitHub workflow dispatch failed with HTTP {(int)result.StatusCode} ({result.ReasonPhrase}).");
             }
         }
 
-        private string GenerateAccessTokenFromPem()
+        string GenerateAccessTokenFromPem()
         {
-            // from:
-            // https://docs.github.com/en/apps/creating-github-apps/authenticating-with-a-github-app/generating-a-json-web-token-jwt-for-a-github-app#example-using-powershell-to-generate-a-jwt
-
-            var header = EncodeObject(new
-            {
-                alg = "RS256",
-                typ = "JWT"
-            });
-
+            var header = EncodeObject(new { alg = "RS256", typ = "JWT" });
             var payload = EncodeObject(new
             {
                 iat = DateTimeOffset.UtcNow.AddMinutes(-1).ToUnixTimeSeconds(),
@@ -91,32 +84,28 @@ namespace C3PR.Core.Services
                 iss = _githubAppClientId
             });
 
-            var rsa = RSA.Create();
+            using var rsa = RSA.Create();
             rsa.ImportFromPem(_githubAppPem.ToCharArray());
-
-            var signature = EncodeBytes(
-                rsa.SignData(UTF8.GetBytes($"{header}.{payload}"),
+            var signature = EncodeBytes(rsa.SignData(
+                Encoding.UTF8.GetBytes($"{header}.{payload}"),
                 HashAlgorithmName.SHA256,
                 RSASignaturePadding.Pkcs1));
-
             return $"{header}.{payload}.{signature}";
         }
 
-        private string EncodeObject(object value)
-        {
-            var json = JsonConvert.SerializeObject(value);
-            var bits = UTF8.GetBytes(json);
-            return EncodeBytes(bits);
-        }
+        static string EncodeObject(object value) =>
+            EncodeBytes(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(value)));
 
-        private string EncodeBytes(byte[] bits)
-        {
-            return Convert.ToBase64String(bits)
-                .TrimEnd('=')
-                .Replace('+', '-')
-                .Replace('/', '_');
-        }
+        static string EncodeBytes(byte[] bits) =>
+            Convert.ToBase64String(bits).TrimEnd('=').Replace('+', '-').Replace('/', '_');
 
-        private Encoding UTF8 => Encoding.UTF8;
+        static string Required(string value, string name)
+        {
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                throw new ArgumentException("A value is required.", name);
+            }
+            return value;
+        }
     }
 }
