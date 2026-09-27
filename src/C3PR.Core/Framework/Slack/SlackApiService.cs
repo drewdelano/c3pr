@@ -89,9 +89,10 @@ namespace C3PR.Core.Framework
         public async Task<string> FormatAtNotificationFromUserName(string userName)
         {
             var users = await _slackApiClient.Users.List();
-            var user = users.Members.First(u => u.Name == userName.TrimStart('@'));
+            var normalizedName = userName.TrimStart('@');
+            var user = users.Members.FirstOrDefault(u => u.Name == normalizedName);
 
-            return $"<@{user.Id}>";
+            return user == null ? $"@{normalizedName}" : $"<@{user.Id}>";
         }
 
         public async Task<string> FormatAtHere()
