@@ -47,7 +47,7 @@ namespace C3PR.Api.Security
             }
 
             var body = await ReadBody(context.Request);
-            var pathAndQuery = context.Request.PathBase + context.Request.Path + context.Request.QueryString;
+            var pathAndQuery = context.Request.Path + context.Request.QueryString;
             if (!RequestSignature.IsValid(
                 _callbackSecret,
                 context.Request.Headers[RequestSignature.TimestampHeader],

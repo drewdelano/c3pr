@@ -102,5 +102,39 @@ namespace C3PR.Tests
             Assert.That(context.Response.StatusCode, Is.EqualTo(StatusCodes.Status204NoContent));
             Assert.That(downstreamBody, Is.EqualTo(body));
         }
+
+        [Test]
+        public async Task C3prMiddlewareExcludesApiGatewayStageFromTheSignedApplicationPath()
+        {
+            const string secret = "callback-secret";
+            const string body = "channelName=ship-it&shipUrl=https%3A%2F%2Fexample.com";
+            var timestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+            var configuration = new ConfigurationBuilder()
+                .AddInMemoryCollection(new Dictionary<string, string>
+                {
+                    ["C3prCallbackSecret"] = secret,
+                })
+                .Build();
+            var middleware = new RequestAuthenticationMiddleware(
+                context =>
+                {
+                    context.Response.StatusCode = StatusCodes.Status204NoContent;
+                    return Task.CompletedTask;
+                },
+                configuration);
+            var context = new DefaultHttpContext();
+            context.Request.Method = "POST";
+            context.Request.PathBase = "/Prod";
+            context.Request.Path = "/Shipping/SetShipUrl";
+            context.Request.ContentType = "application/x-www-form-urlencoded";
+            context.Request.Body = new MemoryStream(Encoding.UTF8.GetBytes(body));
+            context.Request.Headers[RequestSignature.TimestampHeader] = timestamp.ToString();
+            context.Request.Headers[RequestSignature.SignatureHeader] = RequestSignature.Create(
+                secret, timestamp, "POST", "/Shipping/SetShipUrl", body);
+
+            await middleware.InvokeAsync(context);
+
+            Assert.That(context.Response.StatusCode, Is.EqualTo(StatusCodes.Status204NoContent));
+        }
     }
 }
