@@ -38,21 +38,15 @@ namespace C3PR.Core.Commands
             
             await _slackApiService.PostMessage(commandContext.ChannelName, $"Running the build pipeline...");
             
-            var messageToSelf = await _slackApiService.ReadLatestMessageToSelf();
-            var store = SlackMessageStorage.Parse(messageToSelf);
-
-            var channel = store.FirstOrDefault(c => c.ChannelName == channelName);
-            if (channel == null)
+            // The GitHub Actions trigger is configured from Lambda environment
+            // variables and does not consume legacy Slackbot-DM storage. Reading
+            // that DM here prevents .build from dispatching when Slack refuses
+            // bot-to-Slackbot history access, so pass only the active channel.
+            var channel = new SlackMessageStorage
             {
-                channel = new SlackMessageStorage
-                {
-                    ChannelName = channelName,
-                    ShipUrl = ""
-                };
-
-                messageToSelf = SlackMessageStorage.Stringify(store);
-                await _slackApiService.PostMessage("@slackbot", messageToSelf);
-            }
+                ChannelName = channelName,
+                ShipUrl = ""
+            };
             try
             {
                 await _externalBuildTrigger.TriggerBuild(channel);
