@@ -1,5 +1,12 @@
 using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Text;
+using System.Threading.Tasks;
+using C3PR.Api.Security;
 using C3PR.Core.Security;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Configuration;
 using NUnit.Framework;
 
 namespace C3PR.Tests
@@ -53,6 +60,47 @@ namespace C3PR.Tests
                 "slack-secret", timestamp.ToString(), signature, body, Now), Is.True);
             Assert.That(SlackRequestSignature.IsValid(
                 "slack-secret", timestamp.ToString(), signature, body + "tampered", Now), Is.False);
+        }
+
+        [Test]
+        public async Task SlackMiddlewareVerifiesAndRewindsTheExactUtf8RequestBody()
+        {
+            const string secret = "slack-signing-secret";
+            const string body = "{\n  \"token\": \"legacy-token\",\n  \"challenge\": \"challenge-✓\",\n  \"type\": \"url_verification\"\n}";
+            var timestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+            string downstreamBody = null;
+            var configuration = new ConfigurationBuilder()
+                .AddInMemoryCollection(new Dictionary<string, string>
+                {
+                    ["SlackSigningSecret"] = secret,
+                })
+                .Build();
+            var middleware = new RequestAuthenticationMiddleware(
+                async context =>
+                {
+                    using var reader = new StreamReader(
+                        context.Request.Body,
+                        Encoding.UTF8,
+                        false,
+                        1024,
+                        leaveOpen: true);
+                    downstreamBody = await reader.ReadToEndAsync();
+                    context.Response.StatusCode = StatusCodes.Status204NoContent;
+                },
+                configuration);
+            var context = new DefaultHttpContext();
+            context.Request.Method = "POST";
+            context.Request.Path = "/SlackWebhook/Event";
+            context.Request.ContentType = "application/json";
+            context.Request.Body = new MemoryStream(Encoding.UTF8.GetBytes(body));
+            context.Request.Headers[SlackRequestSignature.TimestampHeader] = timestamp.ToString();
+            context.Request.Headers[SlackRequestSignature.SignatureHeader] =
+                SlackRequestSignature.Create(secret, timestamp, body);
+
+            await middleware.InvokeAsync(context);
+
+            Assert.That(context.Response.StatusCode, Is.EqualTo(StatusCodes.Status204NoContent));
+            Assert.That(downstreamBody, Is.EqualTo(body));
         }
     }
 }
