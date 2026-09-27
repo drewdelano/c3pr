@@ -69,24 +69,6 @@ namespace C3PR.Core.Services
 
         public async Task SetShipUrl(string channelName, string shipUrl)
         {
-            var latest = await _slackApiService.ReadLatestMessageToSelf();
-            latest ??= "";
-
-            var store = SlackMessageStorage.Parse(latest);
-            var channel = store.FirstOrDefault(c => c.ChannelName == channelName);
-            if (channel == null)
-            {
-                channel = new SlackMessageStorage
-                {
-                    ChannelName = channelName
-                };
-                store.Add(channel);
-            }
-            channel.ShipUrl = shipUrl;
-            latest = SlackMessageStorage.Stringify(store);
-            await _slackApiService.PostMessage("@slackbot", latest);
-
-
             // notify in chat
             var topic = await _slackApiService.GetChannelTopic(channelName);
             var train = Train.Parse(topic);
@@ -101,12 +83,12 @@ namespace C3PR.Core.Services
                 }
                 var shippersExcludingDriver = sbShippersExcludingDriver.ToString();
                 var atDriver = await _slackApiService.FormatAtNotificationFromUserName(driver.Name);
-                await _slackApiService.PostMessage(channelName, $"New build deployed! :tada:\n {shippersExcludingDriver}\n{atDriver} please co-ordinate testing.  Once everyone is .ready we can deploy to PROD.");
+                await _slackApiService.PostMessage(channelName, $"New build deployed! :tada:\n{shipUrl}\n {shippersExcludingDriver}\n{atDriver} please co-ordinate testing.  Once everyone is .ready we can deploy to PROD.");
             }
             else
             {
                 var atHere = await _slackApiService.FormatAtHere();
-                await _slackApiService.PostMessage(channelName, $"New build deployed, but wasn't expected {atHere} someone needs to figure out what's going on and post an update here.");
+                await _slackApiService.PostMessage(channelName, $"New build deployed, but wasn't expected:\n{shipUrl}\n{atHere} someone needs to figure out what's going on and post an update here.");
             }
 
         }
